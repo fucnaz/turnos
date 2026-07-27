@@ -55,14 +55,28 @@ export default function App() {
     setIsAdminLoggedIn(false);
   };
 
+  const handleNavClick = (targetId) => {
+    window.dispatchEvent(new CustomEvent('nav-navigate', { detail: { targetId } }));
+  };
+
   return (
     <div className="app-container">
       {/* Dynamic Header */}
       <header className="app-header">
-        <div className="logo">
+        <div className="logo" style={{ cursor: 'pointer' }} onClick={() => handleNavClick('hero')}>
           <Stethoscope size={28} />
           <span>TurnoGo</span>
         </div>
+        
+        {/* Navbar Links - Only in client mode */}
+        {!isAdminMode && (
+          <nav className="nav-links">
+            <button className="nav-link" onClick={() => handleNavClick('hero')}>Inicio</button>
+            <button className="nav-link" onClick={() => handleNavClick('servicios')}>Servicios</button>
+            <button className="nav-link" onClick={() => handleNavClick('quienes-somos')}>Quiénes Somos</button>
+            <button className="nav-link" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }} onClick={() => handleNavClick('booking-wizard')}>Reservar Turno</button>
+          </nav>
+        )}
         
         <div className="nav-buttons">
           {isAdminMode ? (
@@ -166,6 +180,41 @@ export default function App() {
           <BookingPortal onShowToast={showToast} />
         )}
       </main>
+
+      {/* Footer - Only in client mode */}
+      {!isAdminMode && (
+        <footer className="app-footer">
+          <div className="footer-content">
+            <div className="footer-brand">
+              <div className="logo" style={{ cursor: 'pointer', marginBottom: '1rem' }} onClick={() => handleNavClick('hero')}>
+                <Stethoscope size={24} />
+                <span>TurnoGo</span>
+              </div>
+              <p>Atención médica de calidad al alcance de tu mano. Reserva turnos online en segundos con profesionales altamente calificados.</p>
+            </div>
+            
+            <div className="footer-links">
+              <h4>Secciones</h4>
+              <ul>
+                <li><button className="nav-link" style={{ padding: 0, textAlign: 'left' }} onClick={() => handleNavClick('hero')}>Inicio</button></li>
+                <li><button className="nav-link" style={{ padding: 0, textAlign: 'left' }} onClick={() => handleNavClick('servicios')}>Servicios</button></li>
+                <li><button className="nav-link" style={{ padding: 0, textAlign: 'left' }} onClick={() => handleNavClick('quienes-somos')}>Quiénes Somos</button></li>
+                <li><button className="nav-link" style={{ padding: 0, textAlign: 'left', color: 'var(--primary-color)' }} onClick={() => handleNavClick('booking-wizard')}>Reservar Turno</button></li>
+              </ul>
+            </div>
+            
+            <div className="footer-contact">
+              <h4>Contacto</h4>
+              <p>📍 Av. de la Salud 1234, CABA</p>
+              <p>📞 +54 11 5555-5555</p>
+              <p>✉️ contacto@turnogo.com</p>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <p>&copy; {new Date().getFullYear()} TurnoGo. Todos los derechos reservados.</p>
+          </div>
+        </footer>
+      )}
 
       {/* Animated Toast Alert */}
       {toast && (

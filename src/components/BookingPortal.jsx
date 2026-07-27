@@ -58,6 +58,21 @@ export default function BookingPortal({ onShowToast }) {
     loadData();
   }, []);
 
+  // Listen to navigation events from App navbar
+  useEffect(() => {
+    const handleNav = (e) => {
+      const { targetId } = e.detail;
+      setStep(1); // Go back to landing page
+      // Wait for react render to complete, then scroll
+      setTimeout(() => {
+        const el = document.getElementById(targetId);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    };
+    window.addEventListener('nav-navigate', handleNav);
+    return () => window.removeEventListener('nav-navigate', handleNav);
+  }, []);
+
   // Helper: check if date is in vacation range
   const isDateOnVacation = (dateStr, specialist) => {
     if (!specialist || !specialist.vacations) return false;
@@ -287,31 +302,124 @@ export default function BookingPortal({ onShowToast }) {
         </div>
       )}
 
-      {/* STEP 1: Select Specialist */}
+      {/* STEP 1: Select Specialist / Landing Page */}
       {step === 1 && (
-        <div className="glass-panel">
-          <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Selecciona un Especialista</h2>
-          <div className="specialists-grid">
-            {specialists.map(spec => (
-              <div 
-                key={spec.id} 
-                className="glass-panel specialist-card"
-                onClick={() => handleSelectSpecialist(spec)}
+        <>
+          {/* Video Hero Section */}
+          <section id="hero" className="hero-section">
+            <video className="hero-video" src="/hearder.mp4" autoPlay loop muted playsInline />
+            <div className="hero-overlay"></div>
+            <div className="hero-content">
+              <h1 className="hero-title">Tu Salud en Manos Especializadas</h1>
+              <p className="hero-subtitle">
+                Reserva turnos de forma rápida y sencilla con nuestros profesionales de primer nivel.
+                Garantizamos atención médica personalizada y adaptada a tus necesidades.
+              </p>
+              <button 
+                className="btn btn-primary" 
+                style={{ padding: '0.8rem 2rem', fontSize: '1.1rem' }}
+                onClick={() => {
+                  const el = document.getElementById('booking-wizard');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
               >
-                <div className="specialist-img-container">
-                  {spec.photoUrl ? (
-                    <img src={spec.photoUrl} alt={spec.name} className="specialist-img" />
-                  ) : (
-                    <Stethoscope size={48} />
-                  )}
+                Reservar Turno Online
+              </button>
+            </div>
+          </section>
+
+          {/* Servicios Section */}
+          <section id="servicios" className="landing-section">
+            <h2 className="landing-section-title">Nuestros Servicios</h2>
+            <div className="services-grid">
+              <div className="glass-panel service-card">
+                <div className="service-icon-wrapper">
+                  <Stethoscope size={28} />
                 </div>
-                <h3 className="specialist-name">{spec.name}</h3>
-                <p className="specialist-specialty">{spec.specialty}</p>
-                <p className="specialist-desc">{spec.description || 'Especialista listo para atenderte.'}</p>
+                <h3 className="service-title">Consultas Médicas</h3>
+                <p className="service-desc">
+                  Atención presencial en múltiples especialidades para el diagnóstico y tratamiento integral de tu salud.
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
+              
+              <div className="glass-panel service-card">
+                <div className="service-icon-wrapper">
+                  <Clock size={28} />
+                </div>
+                <h3 className="service-title">Gestión de Turnos Ágil</h3>
+                <p className="service-desc">
+                  Reserva, reprograma o cancela tus citas de forma autónoma las 24 horas del día sin esperas telefónicas.
+                </p>
+              </div>
+
+              <div className="glass-panel service-card">
+                <div className="service-icon-wrapper">
+                  <User size={28} />
+                </div>
+                <h3 className="service-title">Especialidades</h3>
+                <p className="service-desc">
+                  Contamos con profesionales experimentados en {specialists.map(s => s.specialty).filter((v, i, a) => a.indexOf(v) === i).join(', ') || 'diversas áreas médicas'}.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Quiénes Somos Section */}
+          <section id="quienes-somos" className="landing-section">
+            <h2 className="landing-section-title">Quiénes Somos</h2>
+            <div className="about-layout">
+              <div className="about-text">
+                <p>
+                  En <strong>TurnoGo</strong>, nos dedicamos a tender un puente entre los mejores profesionales de la salud 
+                  y los pacientes que buscan una atención médica de excelencia. Nuestro centro médico está equipado con 
+                  tecnología moderna y un ambiente diseñado para tu comodidad y bienestar.
+                </p>
+                <p>
+                  Creemos en una medicina humana, accesible e inteligente. Por eso simplificamos la forma de reservar tus turnos 
+                  y planificar tus visitas de la mano de profesionales altamente capacitados y comprometidos con tu salud.
+                </p>
+              </div>
+              <div className="about-brand-box">
+                <h4>TurnoGo Salud</h4>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.25rem', fontSize: '0.9rem' }}>
+                  Tu bienestar es nuestro principal compromiso. Atención personalizada todos los días.
+                </p>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', color: 'var(--primary-color)', fontWeight: 700, fontSize: '0.85rem' }}>
+                  <span>✓ Calidad</span>
+                  <span>•</span>
+                  <span>✓ Rapidez</span>
+                  <span>•</span>
+                  <span>✓ Compromiso</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Specialist Grid Selector */}
+          <section id="booking-wizard" className="glass-panel" style={{ scrollMarginTop: '6rem' }}>
+            <h2 style={{ marginBottom: '2rem', textAlign: 'center' }}>Selecciona un Especialista</h2>
+            <div className="specialists-grid">
+              {specialists.map(spec => (
+                <div 
+                  key={spec.id} 
+                  className="glass-panel specialist-card"
+                  onClick={() => handleSelectSpecialist(spec)}
+                >
+                  <div className="specialist-img-container">
+                    {spec.photoUrl ? (
+                      <img src={spec.photoUrl} alt={spec.name} className="specialist-img" />
+                    ) : (
+                      <Stethoscope size={48} />
+                    )}
+                  </div>
+                  <h3 className="specialist-name">{spec.name}</h3>
+                  <p className="specialist-specialty">{spec.specialty}</p>
+                  <p className="specialist-desc">{spec.description || 'Especialista listo para atenderte.'}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </>
       )}
 
       {/* STEP 2: Select Date & Time */}
