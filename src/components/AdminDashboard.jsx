@@ -395,7 +395,12 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
                             <tr key={b.id}>
                               <td><strong>{b.time} hs</strong></td>
                               <td>{spec ? spec.name : 'Desconocido'}</td>
-                              <td>{b.clientName}</td>
+                              <td>
+                                <div>{b.clientName}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--primary-color)' }}>
+                                  {b.clientInsurance || 'PARTICULAR'}
+                                </div>
+                              </td>
                               <td>{b.clientPhone}</td>
                               <td><span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{b.notes || '-'}</span></td>
                               <td>
@@ -522,7 +527,12 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
                               <td>{new Date(b.date + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
                               <td><strong>{b.time} hs</strong></td>
                               <td>{spec ? spec.name : 'Desconocido'}</td>
-                              <td>{b.clientName}</td>
+                              <td>
+                                <div>{b.clientName}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--primary-color)' }}>
+                                  {b.clientInsurance || 'PARTICULAR'}
+                                </div>
+                              </td>
                               <td>{b.clientPhone}</td>
                               <td><span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{b.notes || '-'}</span></td>
                               <td>

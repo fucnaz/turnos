@@ -30,6 +30,7 @@ export default function BookingPortal({ onShowToast }) {
   const [selectedTime, setSelectedTime] = useState('');
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
+  const [clientInsurance, setClientInsurance] = useState('PARTICULAR');
   const [clientNotes, setClientNotes] = useState('');
   
   // Calendar navigation state
@@ -163,6 +164,7 @@ export default function BookingPortal({ onShowToast }) {
       specialistId: selectedSpecialist.id,
       clientName,
       clientPhone,
+      clientInsurance,
       notes: clientNotes,
       date: selectedDate,
       time: selectedTime,
@@ -192,6 +194,7 @@ export default function BookingPortal({ onShowToast }) {
     setSelectedTime('');
     setClientName('');
     setClientPhone('');
+    setClientInsurance('PARTICULAR');
     setClientNotes('');
     setConfirmedBooking(null);
     setStep(1);
@@ -439,6 +442,21 @@ export default function BookingPortal({ onShowToast }) {
             </div>
 
             <div className="form-group">
+              <label htmlFor="client-insurance">Obra Social / Cobertura *</label>
+              <select 
+                id="client-insurance" 
+                className="form-control" 
+                value={clientInsurance}
+                onChange={(e) => setClientInsurance(e.target.value)}
+                required
+              >
+                {['PAMI', 'IPS', 'BOREAL', 'AVALIAN', 'SWISS MEDICAL', 'NOBIS', 'MEDIFE', 'OSDE', 'PARTICULAR'].map(insurance => (
+                  <option key={insurance} value={insurance}>{insurance}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
               <label htmlFor="client-notes">Notas u Observaciones (Opcional)</label>
               <div style={{ position: 'relative' }}>
                 <FileText size={18} style={{ position: 'absolute', left: '12px', top: '15px', color: 'var(--text-muted)' }} />
@@ -499,6 +517,10 @@ export default function BookingPortal({ onShowToast }) {
             <div className="success-details-row">
               <span style={{ color: 'var(--text-muted)' }}>Paciente:</span>
               <strong>{clientName}</strong>
+            </div>
+            <div className="success-details-row">
+              <span style={{ color: 'var(--text-muted)' }}>Obra Social:</span>
+              <strong>{confirmedBooking.clientInsurance}</strong>
             </div>
           </div>
 
