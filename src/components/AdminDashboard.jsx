@@ -120,6 +120,54 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
     setShowSpecModal(true);
   };
 
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+      onShowToast("Solo se permiten imágenes JPG o PNG", "error");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Create canvas for resizing
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 200;
+        const MAX_HEIGHT = 200;
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate aspect ratio resizing
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to dataURL string (highly compressed JPEG)
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+        setSpecForm({ ...specForm, photoUrl: compressedBase64 });
+        onShowToast("Foto de perfil cargada correctamente", "success");
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSaveSpecialist = async (e) => {
     e.preventDefault();
     if (!specForm.name || !specForm.specialty) {
@@ -691,12 +739,49 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
                 />
               </div>
               <div className="form-group">
-                <label>URL de Foto de Perfil (Opcional)</label>
+                <label>Foto de Perfil (Opcional)</label>
+                
+                {/* Visual Preview */}
+                {specForm.photoUrl && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem', padding: '0.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                    <div className="specialist-img-container" style={{ width: '50px', height: '50px', margin: 0 }}>
+                      <img src={specForm.photoUrl} alt="Preview" className="specialist-img" />
+                    </div>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vista previa</span>
+                    <button 
+                      type="button" 
+                      className="btn btn-text" 
+                      style={{ marginLeft: 'auto', padding: '0.2rem', color: 'var(--vacation-color)' }}
+                      onClick={() => setSpecForm({ ...specForm, photoUrl: '' })}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+
+                {/* Upload Action */}
                 <input 
-                  type="url" 
-                  className="form-control"
-                  placeholder="https://ejemplo.com/foto.jpg"
-                  value={specForm.photoUrl}
+                  type="file" 
+                  accept="image/png, image/jpeg" 
+                  style={{ display: 'none' }} 
+                  id="photo-upload-input" 
+                  onChange={handlePhotoUpload} 
+                />
+                <label 
+                  htmlFor="photo-upload-input" 
+                  className="btn" 
+                  style={{ cursor: 'pointer', width: '100%', justifyContent: 'center', background: 'var(--input-bg)' }}
+                >
+                  📤 Subir Imagen (PNG, JPG)
+                </label>
+
+                {/* Direct URL input fallback */}
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}
+                  placeholder="O pega la URL de la imagen aquí..."
+                  value={specForm.photoUrl && specForm.photoUrl.startsWith('data:') ? '' : specForm.photoUrl}
                   onChange={(e) => setSpecForm({ ...specForm, photoUrl: e.target.value })}
                 />
               </div>

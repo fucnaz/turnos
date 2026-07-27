@@ -737,15 +737,9 @@ button, input, select, textarea {
 /* Schedules Grid Editor */
 .schedule-grid-editor {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
   gap: 0.75rem;
   margin-top: 1rem;
-}
-
-@media (max-width: 600px) {
-  .schedule-grid-editor {
-    grid-template-columns: 1fr;
-  }
 }
 
 .schedule-day-card {
