@@ -214,6 +214,30 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
     setShowScheduleModal(true);
   };
 
+  const handleWeeklyScheduleChange = (dayId, value) => {
+    if (value === 'custom') {
+      setWeeklySchedule(prev => ({
+        ...prev,
+        [dayId]: { type: 'custom', start: '08:00', end: '13:00' }
+      }));
+    } else {
+      setWeeklySchedule(prev => ({
+        ...prev,
+        [dayId]: value
+      }));
+    }
+  };
+
+  const handleWeeklyScheduleTimeChange = (dayId, field, timeVal) => {
+    setWeeklySchedule(prev => ({
+      ...prev,
+      [dayId]: {
+        ...prev[dayId],
+        [field]: timeVal
+      }
+    }));
+  };
+
   const handleSaveSchedule = async () => {
     try {
       await updateSpecialist(selectedSpecForSchedule.id, { weeklySchedule });
@@ -797,7 +821,7 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
       {/* Schedule Editor Modal */}
       {showScheduleModal && selectedSpecForSchedule && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: '600px' }}>
+          <div className="modal-content" style={{ maxWidth: '850px', width: '95%' }}>
             <div className="modal-header">
               <h3>Horarios Semanales: {selectedSpecForSchedule.name}</h3>
               <button className="btn btn-text" style={{ padding: '0.2rem' }} onClick={() => setShowScheduleModal(false)}>
@@ -806,7 +830,7 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
             </div>
             
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-              Define el turno de atención para cada día de la semana. "Ambos" cubre mañana y tarde.
+              Define el turno de atención para cada día de la semana o elige un horario personalizado para ese día.
             </p>
 
             <div className="schedule-grid-editor">
@@ -818,22 +842,54 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
                 { label: 'Viernes', id: '5' },
                 { label: 'Sábado', id: '6' },
                 { label: 'Domingo', id: '0' }
-              ].map(day => (
-                <div key={day.id} className="schedule-day-card">
-                  <h5>{day.label}</h5>
-                  <select 
-                    className="form-control" 
-                    style={{ fontSize: '0.8rem', padding: '0.4rem' }}
-                    value={weeklySchedule[day.id] || 'none'}
-                    onChange={(e) => setWeeklySchedule({ ...weeklySchedule, [day.id]: e.target.value })}
-                  >
-                    <option value="none">Sin atención</option>
-                    <option value="morning">Mañana</option>
-                    <option value="afternoon">Tarde</option>
-                    <option value="both">Ambos</option>
-                  </select>
-                </div>
-              ))}
+              ].map(day => {
+                const daySched = weeklySchedule[day.id] || 'none';
+                const isCustom = typeof daySched === 'object' && daySched.type === 'custom';
+                const dropdownValue = isCustom ? 'custom' : daySched;
+
+                return (
+                  <div key={day.id} className="schedule-day-card">
+                    <h5 style={{ marginBottom: '0.4rem' }}>{day.label}</h5>
+                    <select 
+                      className="form-control" 
+                      style={{ fontSize: '0.8rem', padding: '0.4rem', marginBottom: isCustom ? '0.5rem' : '0' }}
+                      value={dropdownValue}
+                      onChange={(e) => handleWeeklyScheduleChange(day.id, e.target.value)}
+                    >
+                      <option value="none">Sin atención</option>
+                      <option value="morning">Mañana</option>
+                      <option value="afternoon">Tarde</option>
+                      <option value="both">Ambos</option>
+                      <option value="custom">Personalizado</option>
+                    </select>
+
+                    {isCustom && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: '0.25rem', textAlign: 'left' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.25rem' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Desde:</span>
+                          <input 
+                            type="time" 
+                            className="form-control" 
+                            style={{ fontSize: '0.75rem', padding: '0.15rem 0.3rem', width: '68px', height: 'auto' }}
+                            value={daySched.start || '08:00'}
+                            onChange={(e) => handleWeeklyScheduleTimeChange(day.id, 'start', e.target.value)}
+                          />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.25rem' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Hasta:</span>
+                          <input 
+                            type="time" 
+                            className="form-control" 
+                            style={{ fontSize: '0.75rem', padding: '0.15rem 0.3rem', width: '68px', height: 'auto' }}
+                            value={daySched.end || '13:00'}
+                            onChange={(e) => handleWeeklyScheduleTimeChange(day.id, 'end', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="modal-footer">
