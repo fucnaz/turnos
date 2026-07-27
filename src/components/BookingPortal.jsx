@@ -100,12 +100,18 @@ export default function BookingPortal({ onShowToast }) {
     return targetDate < today;
   };
 
+  const isWorkingShift = (shift) => {
+    if (!shift || shift === 'none') return false;
+    if (typeof shift === 'object' && shift.type === 'none') return false;
+    return true;
+  };
+
   // Generate slots for selected date & specialist
   const generateSlots = () => {
     if (!selectedSpecialist || !selectedDate || !settings) return [];
     
     const shift = getDayShift(selectedDate, selectedSpecialist);
-    if (shift === 'none' || isDateOnVacation(selectedDate, selectedSpecialist)) {
+    if (!isWorkingShift(shift) || isDateOnVacation(selectedDate, selectedSpecialist)) {
       return [];
     }
 
@@ -130,11 +136,15 @@ export default function BookingPortal({ onShowToast }) {
       }
     };
 
-    if (shift === 'morning' || shift === 'both') {
-      addSlotsRange(settings.morningStart, settings.morningEnd);
-    }
-    if (shift === 'afternoon' || shift === 'both') {
-      addSlotsRange(settings.afternoonStart, settings.afternoonEnd);
+    if (typeof shift === 'object' && shift.type === 'custom') {
+      addSlotsRange(shift.start || '08:00', shift.end || '13:00');
+    } else {
+      if (shift === 'morning' || shift === 'both') {
+        addSlotsRange(settings.morningStart, settings.morningEnd);
+      }
+      if (shift === 'afternoon' || shift === 'both') {
+        addSlotsRange(settings.afternoonStart, settings.afternoonEnd);
+      }
     }
 
     // Filter out already booked slots
@@ -236,7 +246,7 @@ export default function BookingPortal({ onShowToast }) {
       const isVacation = isDateOnVacation(dateStr, selectedSpecialist);
       const shift = getDayShift(dateStr, selectedSpecialist);
       
-      const isAvailable = !isPast && !isVacation && shift !== 'none';
+      const isAvailable = !isPast && !isVacation && isWorkingShift(shift);
       const isSelected = selectedDate === dateStr;
       
       const today = new Date();
