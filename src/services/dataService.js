@@ -22,6 +22,8 @@ const DEFAULT_SPECIALISTS = [
     specialty: "Dermatología",
     description: "Especialista en dermatología clínica y estética con más de 10 años de experiencia.",
     photoUrl: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=300",
+    email: "sofia@turnogo.com",
+    password: "123",
     weeklySchedule: {
       "1": "morning",   // Lunes: Mañana
       "2": "afternoon", // Martes: Tarde
@@ -41,6 +43,8 @@ const DEFAULT_SPECIALISTS = [
     specialty: "Pediatría",
     description: "Pediatra dedicado a la atención integral de niños y adolescentes con calidez humana.",
     photoUrl: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=300",
+    email: "carlos@turnogo.com",
+    password: "123",
     weeklySchedule: {
       "1": "afternoon", // Lunes: Tarde
       "2": "morning",   // Martes: Mañana
@@ -58,6 +62,8 @@ const DEFAULT_SPECIALISTS = [
     specialty: "Ginecología",
     description: "Especialista en salud femenina, obstetricia y control prenatal de alta complejidad.",
     photoUrl: "https://images.unsplash.com/photo-1594824813573-246434de83fb?q=80&w=300",
+    email: "laura@turnogo.com",
+    password: "123",
     weeklySchedule: {
       "1": "morning",
       "2": "morning",
@@ -315,38 +321,63 @@ export const deleteBooking = async (id) => {
 
 // --- AUTH SERVICE ---
 
-export const loginAdmin = async (email, password) => {
+export const loginUser = async (email, password) => {
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@turnogo.com';
   
-  if (email.toLowerCase() !== adminEmail.toLowerCase()) {
-    throw new Error("Acceso denegado: El correo no corresponde al administrador.");
-  }
+  // 1. Check Admin Login
+  if (email.toLowerCase() === adminEmail.toLowerCase()) {
+    if (isFirebaseConfigured) {
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = { email: userCredential.user.email, uid: userCredential.user.uid, role: 'admin' };
+        localStorage.setItem('turnogo_session', JSON.stringify(user));
+        return user;
+      } catch (e) {
+        console.error("Firebase sign-in error", e);
+        throw e;
+      }
+    }
 
-  if (isFirebaseConfigured) {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
-    } catch (e) {
-      console.error("Firebase sign-in error", e);
-      throw e;
+    // Offline Admin login
+    if (password === 'admin123') {
+      const mockUser = { email: adminEmail, uid: 'mock_admin_123', role: 'admin' };
+      localStorage.setItem('turnogo_session', JSON.stringify(mockUser));
+      return mockUser;
+    } else {
+      throw new Error("Contraseña incorrecta (para modo offline use 'admin123').");
     }
   }
 
-  // Local Storage Admin Simulation
-  if (password === 'admin123') {
-    const mockUser = { email: adminEmail, uid: 'mock_admin_123' };
-    localStorage.setItem('turnogo_session', JSON.stringify(mockUser));
-    return mockUser;
-  } else {
-    throw new Error("Contraseña incorrecta (para modo offline use 'admin123').");
+  // 2. Check Specialist Login
+  const specs = await getSpecialists();
+  const spec = specs.find(s => s.email?.toLowerCase() === email.toLowerCase());
+
+  if (spec) {
+    if (spec.password === password) {
+      const mockUser = { 
+        email: spec.email, 
+        uid: spec.id, 
+        role: 'specialist', 
+        specialistId: spec.id, 
+        name: spec.name 
+      };
+      localStorage.setItem('turnogo_session', JSON.stringify(mockUser));
+      return mockUser;
+    } else {
+      throw new Error("Contraseña incorrecta para el especialista.");
+    }
   }
+
+  throw new Error("El correo ingresado no corresponde a ningún administrador o especialista.");
 };
+
+// Maintain loginAdmin for backward compatibility/aliases
+export const loginAdmin = loginUser;
 
 export const logoutAdmin = async () => {
   if (isFirebaseConfigured) {
     try {
       await signOut(auth);
-      return true;
     } catch (e) {
       console.error("Firebase logout error", e);
     }
@@ -356,8 +387,11 @@ export const logoutAdmin = async () => {
 };
 
 export const getCurrentUser = () => {
-  if (isFirebaseConfigured) {
-    return auth?.currentUser || null;
+  const session = JSON.parse(localStorage.getItem('turnogo_session'));
+  if (session) return session;
+  
+  if (isFirebaseConfigured && auth?.currentUser) {
+    return { email: auth.currentUser.email, uid: auth.currentUser.uid, role: 'admin' };
   }
-  return JSON.parse(localStorage.getItem('turnogo_session')) || null;
+  return null;
 };

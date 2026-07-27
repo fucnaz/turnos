@@ -51,7 +51,9 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
     name: '',
     specialty: '',
     description: '',
-    photoUrl: ''
+    photoUrl: '',
+    email: '',
+    password: ''
   });
   const [showSpecModal, setShowSpecModal] = useState(false);
 
@@ -104,7 +106,7 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
   // --- SPECIALISTS MANAGEMENT ---
   const handleOpenSpecAdd = () => {
     setSpecFormMode('add');
-    setSpecForm({ name: '', specialty: '', description: '', photoUrl: '' });
+    setSpecForm({ name: '', specialty: '', description: '', photoUrl: '', email: '', password: '' });
     setShowSpecModal(true);
   };
 
@@ -115,7 +117,9 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
       name: spec.name,
       specialty: spec.specialty,
       description: spec.description || '',
-      photoUrl: spec.photoUrl || ''
+      photoUrl: spec.photoUrl || '',
+      email: spec.email || '',
+      password: spec.password || ''
     });
     setShowSpecModal(true);
   };
@@ -760,6 +764,28 @@ export default function AdminDashboard({ onLogout, onShowToast }) {
                   placeholder="Información relevante sobre el especialista..."
                   value={specForm.description}
                   onChange={(e) => setSpecForm({ ...specForm, description: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Correo de Acceso (Especialista) *</label>
+                <input 
+                  type="email" 
+                  className="form-control"
+                  placeholder="ejemplo@turnogo.com"
+                  value={specForm.email || ''}
+                  onChange={(e) => setSpecForm({ ...specForm, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Contraseña de Acceso *</label>
+                <input 
+                  type="password" 
+                  className="form-control"
+                  placeholder="Mínimo 6 caracteres"
+                  value={specForm.password || ''}
+                  onChange={(e) => setSpecForm({ ...specForm, password: e.target.value })}
+                  required
                 />
               </div>
               <div className="form-group">

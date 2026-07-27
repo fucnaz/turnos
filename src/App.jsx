@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import BookingPortal from './components/BookingPortal';
 import AdminDashboard from './components/AdminDashboard';
-import { isFirebaseConfigured, getCurrentUser, loginAdmin } from './services/dataService';
+import SpecialistDashboard from './components/SpecialistDashboard';
+import { isFirebaseConfigured, getCurrentUser, loginUser } from './services/dataService';
 import { Stethoscope, LogIn, Globe, Sliders, AlertTriangle } from 'lucide-react';
 
 export default function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [currentSession, setCurrentSession] = useState(null);
   const [toast, setToast] = useState(null);
 
-  // Admin Login Credentials Form
+  // Admin/Specialist Login Form
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
@@ -18,7 +19,9 @@ export default function App() {
   useEffect(() => {
     const user = getCurrentUser();
     if (user) {
-      setIsAdminLoggedIn(true);
+      setCurrentSession(user);
+    } else {
+      setCurrentSession(null);
     }
   }, [isAdminMode]);
 
@@ -39,11 +42,11 @@ export default function App() {
 
     setLoginLoading(true);
     try {
-      await loginAdmin(loginEmail, loginPassword);
-      setIsAdminLoggedIn(true);
+      const loggedUser = await loginUser(loginEmail, loginPassword);
+      setCurrentSession(loggedUser);
       setLoginEmail('');
       setLoginPassword('');
-      showToast("Inicio de sesión exitoso", "success");
+      showToast(`¡Bienvenido, ${loggedUser.role === 'admin' ? 'Administrador' : loggedUser.name}!`, "success");
     } catch (err) {
       showToast(err.message || "Credenciales incorrectas", "error");
     } finally {
@@ -52,7 +55,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    setIsAdminLoggedIn(false);
+    setCurrentSession(null);
   };
 
   const handleNavClick = (targetId) => {
@@ -110,10 +113,14 @@ export default function App() {
             (LocalStorage). Para conectar a su base de datos Firebase real, complete los valores en el archivo 
             <code>.env</code> en el directorio raíz del proyecto y reinicie el servidor de desarrollo.
           </p>
-          {isAdminMode && !isAdminLoggedIn && (
-            <p style={{ fontSize: '0.825rem', color: '#f59e0b', marginTop: '0.5rem', fontWeight: 600 }}>
-              💡 Contraseña offline para demo: <code>admin123</code> (con cualquier correo admin en .env)
-            </p>
+          {isAdminMode && !currentSession && (
+            <div style={{ marginTop: '0.5rem', fontSize: '0.825rem', color: '#f59e0b', textAlign: 'left', display: 'inline-block' }}>
+              <p>💡 <strong>Credenciales demo offline:</strong></p>
+              <ul style={{ paddingLeft: '1.25rem', marginTop: '0.25rem' }}>
+                <li>Admin: <code>admin@turnogo.com</code> / Contraseña: <code>admin123</code></li>
+                <li>Especialista: <code>sofia@turnogo.com</code> / Contraseña: <code>123</code></li>
+              </ul>
+            </div>
           )}
         </div>
       )}
@@ -121,28 +128,36 @@ export default function App() {
       {/* Main Container */}
       <main className="main-content">
         {isAdminMode ? (
-          /* Admin Dashboard & Login Flow */
-          isAdminLoggedIn ? (
-            <AdminDashboard 
-              onLogout={handleLogout} 
-              onShowToast={showToast} 
-            />
+          /* Admin / Specialist Dashboard & Login Flow */
+          currentSession ? (
+            currentSession.role === 'admin' ? (
+              <AdminDashboard 
+                onLogout={handleLogout} 
+                onShowToast={showToast} 
+              />
+            ) : (
+              <SpecialistDashboard 
+                currentSession={currentSession}
+                onLogout={handleLogout}
+                onShowToast={showToast}
+              />
+            )
           ) : (
             <div style={{ maxWidth: '440px', margin: '4rem auto 0 auto', width: '100%' }}>
               <div className="glass-panel">
-                <h2 style={{ textAlign: 'center', marginBottom: '0.5rem' }}>Administración</h2>
+                <h2 style={{ textAlign: 'center', marginBottom: '0.5rem' }}>Acceso Profesional</h2>
                 <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-                  Inicia sesión para gestionar especialistas y turnos.
+                  Inicia sesión como administrador o especialista.
                 </p>
 
                 <form onSubmit={handleLoginSubmit}>
                   <div className="form-group">
-                    <label htmlFor="login-email">Correo Electrónico Admin</label>
+                    <label htmlFor="login-email">Correo Electrónico</label>
                     <input 
                       type="email" 
                       id="login-email" 
                       className="form-control"
-                      placeholder="admin@turnogo.com"
+                      placeholder="ejemplo@turnogo.com"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
