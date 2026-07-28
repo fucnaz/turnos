@@ -380,26 +380,27 @@ export default function BookingPortal({ onShowToast }) {
             <div className="about-layout">
               <div className="about-text">
                 <p>
-                  En <strong>TurnoGo</strong>, nos dedicamos a tender un puente entre los mejores profesionales de la salud 
-                  y los pacientes que buscan una atención médica de excelencia. Nuestro centro médico está equipado con 
-                  tecnología moderna y un ambiente diseñado para tu comodidad y bienestar.
+                  En <strong>TurnoGo</strong>, somos creadores de soluciones inteligentes y automatizadas de gestión de turnos 
+                  para todo tipo de sistemas, consultorios, clínicas y cualquier negocio que requiera una planificación 
+                  de citas eficiente y sin fricciones. 
                 </p>
                 <p>
-                  Creemos en una medicina humana, accesible e inteligente. Por eso simplificamos la forma de reservar tus turnos 
-                  y planificar tus visitas de la mano de profesionales altamente capacitados y comprometidos con tu salud.
+                  Desarrollamos herramientas de alta calidad diseñadas para optimizar la agenda de los profesionales 
+                  y facilitar el acceso a los clientes. Nuestra misión es transformar la forma en que administras tu tiempo 
+                  y tus reservas a través de tecnología ágil, intuitiva y accesible.
                 </p>
               </div>
               <div className="about-brand-box">
-                <h4>TurnoGo Salud</h4>
+                <h4>TurnoGo Sistemas</h4>
                 <p style={{ color: 'var(--text-muted)', marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-                  Tu bienestar es nuestro principal compromiso. Atención personalizada todos los días.
+                  Creamos la agenda digital ideal para tu negocio. Control total y simplicidad en cada reserva.
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', color: 'var(--primary-color)', fontWeight: 700, fontSize: '0.85rem' }}>
-                  <span>✓ Calidad</span>
+                  <span>✓ Eficiencia</span>
                   <span>•</span>
-                  <span>✓ Rapidez</span>
+                  <span>✓ Adaptabilidad</span>
                   <span>•</span>
-                  <span>✓ Compromiso</span>
+                  <span>✓ Control</span>
                 </div>
               </div>
             </div>
